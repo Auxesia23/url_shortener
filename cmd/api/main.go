@@ -3,10 +3,11 @@ package main
 import (
 	"log"
 
+	"github.com/Auxesia23/url_shortener/internal/auth"
 	"github.com/Auxesia23/url_shortener/internal/db"
-	"github.com/Auxesia23/url_shortener/internal/handler"
-	"github.com/Auxesia23/url_shortener/internal/repository"
-	"github.com/Auxesia23/url_shortener/internal/service"
+	"github.com/Auxesia23/url_shortener/internal/handlers"
+	"github.com/Auxesia23/url_shortener/internal/repositories"
+	"github.com/Auxesia23/url_shortener/internal/services"
 )
 
 func main() {
@@ -15,6 +16,8 @@ func main() {
 		addr: ":8080",
 	}
 	
+	//Initialize Oauth
+	auth.InitOauth()
 	
 	//Database
 	db, err := db.InitDB()

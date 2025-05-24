@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/Auxesia23/url_shortener/internal/handler"
+	"github.com/Auxesia23/url_shortener/internal/handlers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,13 +28,7 @@ func (app *application) mount() http.Handler {
 	r := gin.Default()
 	
 	r.GET("/healthcheck", app.HealthCheck.Check)
-	{
-		v1 := r.Group("/v1")
-		{
-			user := v1.Group("/user")
-			user.POST("/register", app.User.CreateUser)
-		}
-	}
+
 	return r
 }
 
