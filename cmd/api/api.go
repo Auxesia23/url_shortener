@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	handler "github.com/Auxesia23/url_shortener/internal/handlers"
+	middlewares "github.com/Auxesia23/url_shortener/internal/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,6 +12,7 @@ import (
 type application struct {
     config config
     userHandler handler.UserHandler
+    urlHandler handler.UrlHandler
 }
 
 
@@ -34,9 +36,19 @@ func (app *application) mount() http.Handler {
 		
 		{
 			auth := v1.Group("/auth")
-			auth.GET("/google", app.userHandler.GoogleLogin)
-			auth.GET("/google/callback", app.userHandler.GoogleCallback)
+			auth.GET("/google", app.userHandler.HandleGoogleLogin)
+			auth.GET("/google/callback", app.userHandler.HandleGoogleCallback)
 		}
+		
+		{
+			urls := v1.Group("/urls")
+			urls.POST("/", middlewares.JwtAuthMiddleware(), app.urlHandler.HandleCreateUrl)
+			urls.GET("/", middlewares.JwtAuthMiddleware(), app.urlHandler.HandleGetUrlByEmail)
+			urls.DELETE("/:id", middlewares.JwtAuthMiddleware(), app.urlHandler.HandleDeleteUrl)
+			urls.GET("/:id", app.urlHandler.HandleGetUrl)
+		}
+		
+		
 	}
 	
 
