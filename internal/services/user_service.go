@@ -3,39 +3,72 @@ package service
 import (
 	"context"
 
+	"github.com/Auxesia23/url_shortener/internal/auth"
 	"github.com/Auxesia23/url_shortener/internal/models"
 	"github.com/Auxesia23/url_shortener/internal/repositories"
 )
 
-type UserService struct {
+type UserService interface {
+	GoogleLogin(ctx context.Context,code string)(string, error)
+}
+
+type userService struct {
 	userRepo repository.UserRepository
 }
 
-func NewUserService(userRepo repository.UserRepository) *UserService {
-	return &UserService{
+func NewUserService(userRepo repository.UserRepository) UserService {
+	return &userService{
 		userRepo: userRepo,
 	}
 }
 
-func (s *UserService) UserGoogleLogin(ctx context.Context, user models.GoogleUser) (string, error) {
-	_, err := s.userRepo.Read(ctx, user.Email)
-	if err == nil {
-		//Make jwt if user already exist
+func (service *userService) GoogleLogin(ctx context.Context,code string)(string, error){
+	//Exchange code for oauth2 token
+	token, err := auth.ExchangeToken(code)
+	if err != nil {
+		return "",err
 	}
 	
-	newUser := models.User{
-		Email: user.Email,
-		Name: user.GivenName,
-		Picture: user.Picture,
+	//Fetching google user info
+	googleUser, err := auth.FetchUserInfo(token)
+	if err != nil {
+		return "",err
 	}
 	
-	err = s.userRepo.Create(ctx, newUser)
+	//User for creating jwt
+	var userForJWT models.User 
+	
+	//Check if user already exist
+	userForJWT, err = service.userRepo.Read(ctx, googleUser.Email)
+	if err != nil {
+		//If not exist, create new user
+		newUser := models.User{
+			Email: googleUser.Email,
+			Name: googleUser.Name,
+			Picture: googleUser.Picture,
+		}
+		
+		//Creating new user from google user info
+		err := service.userRepo.Create(ctx, newUser)
+		if err != nil {
+			return "", err
+		}
+		
+		//Getting created user data
+		userForJWT, err = service.userRepo.Read(ctx, googleUser.Email)
+		if err != nil {
+			return "", err
+		}
+	}
+	
+	//Generate jwt
+	jwt, err := auth.GenerateToken(&userForJWT)
 	if err != nil {
 		return "", err
 	}
 	
-	
-	return "", nil
+	return jwt, nil
 }
+	
 
 

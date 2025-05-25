@@ -3,16 +3,16 @@ package main
 import (
 	"net/http"
 
-	"github.com/Auxesia23/url_shortener/internal/handlers"
+	handler "github.com/Auxesia23/url_shortener/internal/handlers"
 	"github.com/gin-gonic/gin"
 )
 
 
 type application struct {
     config config
-    HealthCheck handler.HealthCheck
-    User handler.UserHandler
+    userHandler handler.UserHandler
 }
+
 
 type config struct {
     addr string
@@ -26,8 +26,19 @@ func NewApplication(cfg config) *application {
 
 func (app *application) mount() http.Handler {
 	r := gin.Default()
+	{
+		v1 := r.Group("/v1")
+		v1.GET("/status", func(c *gin.Context){
+			c.JSON(200, gin.H{"status" : "OK, Server up and running"})
+		})
+		
+		{
+			auth := v1.Group("/auth")
+			auth.GET("/google", app.userHandler.GoogleLogin)
+			auth.GET("/google/callback", app.userHandler.GoogleCallback)
+		}
+	}
 	
-	r.GET("/healthcheck", app.HealthCheck.Check)
 
 	return r
 }
