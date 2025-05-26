@@ -25,7 +25,7 @@ func NewUrlService (urlRepo repository.UrlRepository) UrlService{
 }
 
 func (service *urlService) CreateShortUrl(ctx context.Context, url mapper.UrlInput, userEmail string) (mapper.UrlResponse, error){
-	input := mapper.ParseInput(url, userEmail)
+	input := mapper.ParseUrlInput(url, userEmail)
 	err := service.urlRepo.Create(ctx, input)
 	if err != nil {
 		return mapper.UrlResponse{}, err
@@ -36,7 +36,7 @@ func (service *urlService) CreateShortUrl(ctx context.Context, url mapper.UrlInp
 		return mapper.UrlResponse{}, err
 	}
 	
-	response := mapper.ParseResponse(createdUrl)
+	response := mapper.ParseUrlResponse(createdUrl)
 	
 	return response, nil
 }
@@ -47,7 +47,7 @@ func(service *urlService) GetUrl(ctx context.Context, email,shortUrl string) (ma
 		return mapper.UrlResponse{}, err
 	}
 	
-	response := mapper.ParseResponse(url)
+	response := mapper.ParseUrlResponse(url)
 	
 	return response, nil
 }
@@ -58,7 +58,7 @@ func (service *urlService) GetUrlByEmail(ctx context.Context, email string)(mapp
 		return mapper.UrlListResponse{}, err
 	}
 	
-	response := mapper.ParseListResponse(urls)
+	response := mapper.ParseUrlListResponse(urls)
 	
 	return response, nil
 }

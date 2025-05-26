@@ -24,7 +24,7 @@ type UrlListResponse struct{
 	Urls []UrlResponse `json:"urls"`
 }
 
-func ParseResponse(url models.Url) UrlResponse{
+func ParseUrlResponse(url models.Url) UrlResponse{
 	baseUrl := os.Getenv("BASE_URL")
 	return UrlResponse{
 		Original: url.Original,
@@ -33,7 +33,7 @@ func ParseResponse(url models.Url) UrlResponse{
 	}
 }
 
-func ParseInput(url UrlInput, email string) models.Url{
+func ParseUrlInput(url UrlInput, email string) models.Url{
 	return models.Url{
 		Original: url.Original,
 		Shortened: url.Shortened,
@@ -41,7 +41,7 @@ func ParseInput(url UrlInput, email string) models.Url{
 	}
 }
 
-func ParseListResponse(urls []models.Url)UrlListResponse{
+func ParseUrlListResponse(urls []models.Url)UrlListResponse{
 	baseUrl := os.Getenv("BASE_URL")
 	var urlList []UrlResponse
 	for _,url := range(urls){

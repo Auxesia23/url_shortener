@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	handler "github.com/Auxesia23/url_shortener/internal/handlers"
 	middlewares "github.com/Auxesia23/url_shortener/internal/middlewares"
@@ -19,6 +20,9 @@ type application struct {
 
 type config struct {
     addr string
+    readTimeout time.Duration
+    writeTimeout time.Duration
+    idleTimeout time.Duration
 }
 
 func NewApplication(cfg config) *application {
@@ -53,7 +57,6 @@ func (app *application) mount() http.Handler {
 			urls.DELETE("/:id", app.urlHandler.HandleDeleteUrl)
 		}
 		
-		
 	}
 	
 
@@ -64,6 +67,9 @@ func (app *application) run(mux http.Handler) error {
    server := &http.Server{
        Addr:    app.config.addr,
        Handler: mux,
+       ReadTimeout: app.config.readTimeout,
+       WriteTimeout: app.config.writeTimeout,
+       IdleTimeout: app.config.idleTimeout,
    }
 
    return server.ListenAndServe()

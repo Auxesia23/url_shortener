@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/Auxesia23/url_shortener/internal/mapper"
@@ -18,11 +17,13 @@ type UrlHandler interface{
 
 type urlHandler struct{
 	urlService service.UrlService
+	analyticService service.AnalyticService
 }
 
-func NewUrlHandler(urlService service.UrlService) UrlHandler{
+func NewUrlHandler(urlService service.UrlService, analyticServive service.AnalyticService) UrlHandler{
 	return &urlHandler{
 		urlService: urlService,
+		analyticService: analyticServive,
 	}
 }
 
@@ -40,7 +41,7 @@ func(handler *urlHandler) HandleCreateUrl(c *gin.Context){
 		return
 	}
 	
-	url, err := handler.urlService.CreateShortUrl(context.Background(), urlInput, user.(string))
+	url, err := handler.urlService.CreateShortUrl(c.Request.Context(), urlInput, user.(string))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error":"The requested short url has already in use"})
 		return
@@ -53,18 +54,26 @@ func(handler *urlHandler) HandleGetUrl(c *gin.Context){
 	shortUrl := c.Param("id")
 	user := c.MustGet("user")
 	
-	url, err := handler.urlService.GetUrl(context.Background(), user.(string), shortUrl)
+	url, err := handler.urlService.GetUrl(c.Request.Context(), user.(string), shortUrl)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error":"Short url not found"})
 		return
 	}
 	
-	c.JSON(http.StatusOK, url)
+	analytic, err := handler.analyticService.Get(c.Request.Context(), shortUrl)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error":err.Error()})
+		return
+	}
+	
+	
+	
+	c.JSON(http.StatusOK, gin.H{"url":url,"analytic":analytic})
 }
 
 func (handler *urlHandler) HandleGetUrlByEmail(c *gin.Context){
 	user := c.MustGet("user")
-	response, err := handler.urlService.GetUrlByEmail(context.Background(), user.(string))
+	response, err := handler.urlService.GetUrlByEmail(c.Request.Context(), user.(string))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error":err.Error()})
 		return
@@ -76,7 +85,7 @@ func (handler *urlHandler)HandleDeleteUrl(c *gin.Context){
 	user := c.MustGet("user")
 	shortUrl := c.Param("id")
 	
-	err := handler.urlService.DeleteUrl(context.Background(), user.(string), shortUrl)
+	err := handler.urlService.DeleteUrl(c.Request.Context(), user.(string), shortUrl)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error":err.Error()})
 		return
