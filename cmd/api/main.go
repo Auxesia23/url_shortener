@@ -38,16 +38,19 @@ func main() {
 	//service
 	userService := service.NewUserService(userRepo)
 	urlService := service.NewUrlService(urlRepository)
+	redirectService := service.NewRedirectService(urlRepository)
 	
 	//Handler
 	userHandler := handler.NewUserHandler(userService)
 	urlHandler := handler.NewUrlHandler(urlService)
+	redirectHandler := handler.NewRedirectHandler(redirectService)
 	
 	//Dependencies Injection for Application
 	app := &application{
 		config: cfg,
 		userHandler: userHandler,
 		urlHandler: urlHandler,
+		redirectHandler: redirectHandler,
 	}
 	
 	//Initiate Handlers
