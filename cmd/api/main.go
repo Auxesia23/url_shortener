@@ -33,17 +33,21 @@ func main() {
 	
 	//Repository
 	userRepo := repository.NewUserRepository(db)
+	urlRepository := repository.NewUrlRepository(db)
 	
 	//service
 	userService := service.NewUserService(userRepo)
+	urlService := service.NewUrlService(urlRepository)
 	
 	//Handler
 	userHandler := handler.NewUserHandler(userService)
+	urlHandler := handler.NewUrlHandler(urlService)
 	
 	//Dependencies Injection for Application
 	app := &application{
 		config: cfg,
 		userHandler: userHandler,
+		urlHandler: urlHandler,
 	}
 	
 	//Initiate Handlers

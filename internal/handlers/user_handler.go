@@ -11,8 +11,8 @@ import (
 )
 
 type UserHandler interface{
-	GoogleLogin(c *gin.Context)
-	GoogleCallback(c *gin.Context)
+	HandleGoogleLogin(c *gin.Context)
+	HandleGoogleCallback(c *gin.Context)
 }
 
 type userHandler struct {
@@ -26,7 +26,7 @@ func NewUserHandler(userService service.UserService) UserHandler {
 }
 
 
-func (handler *userHandler) GoogleLogin(c *gin.Context){
+func (handler *userHandler) HandleGoogleLogin(c *gin.Context){
 	clientId := os.Getenv("GOOGLE_CLIENT_ID")
 	redirectUri := os.Getenv("GOOGLE_REDIRECT_URI")
 	
@@ -38,7 +38,7 @@ func (handler *userHandler) GoogleLogin(c *gin.Context){
 	c.PureJSON(http.StatusOK, gin.H{"url" : oauthUri})
 }
 
-func (handler *userHandler) GoogleCallback(c *gin.Context){
+func (handler *userHandler) HandleGoogleCallback(c *gin.Context){
 	code := c.Query("code")
 	
 	jwt, err := handler.userService.GoogleLogin(context.Background(), code)
