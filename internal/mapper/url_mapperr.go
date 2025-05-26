@@ -3,6 +3,7 @@ package mapper
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/Auxesia23/url_shortener/internal/models"
 )
@@ -11,6 +12,7 @@ import (
 type UrlResponse struct{
 	Original string `json:"original"`
 	Shortened string `json:"shortened"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type UrlInput struct{
@@ -27,6 +29,7 @@ func ParseResponse(url models.Url) UrlResponse{
 	return UrlResponse{
 		Original: url.Original,
 		Shortened: fmt.Sprintf(baseUrl+"/%s", url.Shortened),
+		CreatedAt: url.CreatedAt,
 	}
 }
 
@@ -45,6 +48,7 @@ func ParseListResponse(urls []models.Url)UrlListResponse{
 		urlList = append(urlList, UrlResponse{
 			Original: url.Original,
 			Shortened: fmt.Sprintf(baseUrl+"/%s", url.Shortened),
+			CreatedAt: url.CreatedAt,
 		})
 	}
 	return UrlListResponse{

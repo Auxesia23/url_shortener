@@ -9,7 +9,7 @@ import (
 
 type UrlService interface{
 	CreateShortUrl(ctx context.Context, url mapper.UrlInput, userEmail string) (mapper.UrlResponse, error)
-	GetUrl(ctx context.Context, shortUrl string)(mapper.UrlResponse, error)
+	GetUrl(ctx context.Context, email, shortUrl string)(mapper.UrlResponse, error)
 	GetUrlByEmail(ctx context.Context, email string)(mapper.UrlListResponse, error)
 	DeleteUrl(ctx context.Context, email,shortUrl string) error
 }
@@ -41,8 +41,8 @@ func (service *urlService) CreateShortUrl(ctx context.Context, url mapper.UrlInp
 	return response, nil
 }
 
-func(service *urlService) GetUrl(ctx context.Context, shortUrl string) (mapper.UrlResponse, error) {
-	url, err := service.urlRepo.Read(ctx, shortUrl)
+func(service *urlService) GetUrl(ctx context.Context, email,shortUrl string) (mapper.UrlResponse, error) {
+	url, err := service.urlRepo.ReadByEmail(ctx, email,shortUrl)
 	if err != nil {
 		return mapper.UrlResponse{}, err
 	}
@@ -53,7 +53,7 @@ func(service *urlService) GetUrl(ctx context.Context, shortUrl string) (mapper.U
 }
 
 func (service *urlService) GetUrlByEmail(ctx context.Context, email string)(mapper.UrlListResponse, error){
-	urls, err := service.urlRepo.ReadByEmail(ctx, email)
+	urls, err := service.urlRepo.ReadListByEmail(ctx, email)
 	if err != nil {
 		return mapper.UrlListResponse{}, err
 	}

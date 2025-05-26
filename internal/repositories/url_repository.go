@@ -9,8 +9,9 @@ import (
 
 type UrlRepository interface{
 	Create(ctx context.Context, url models.Url) error
-	Read(ctx context.Context, shortenedUrl string) (models.Url, error)
-	ReadByEmail(ctx context.Context, email string) ([]models.Url, error)
+	Read(ctx context.Context, shortUrl string) (models.Url, error)
+	ReadByEmail(ctx context.Context, email, shortenedUrl string) (models.Url, error)
+	ReadListByEmail(ctx context.Context, email string) ([]models.Url, error)
 	Delete(ctx context.Context, email,shortUrl string) error
 }
 
@@ -32,16 +33,25 @@ func (repo *urlRepository) Create(ctx context.Context, url models.Url)error {
 	return nil
 }
 
-func (repo *urlRepository) Read(ctx context.Context, shortenedUrl string) (models.Url, error){
+func(repo *urlRepository) Read(ctx context.Context, shortUrl string) (models.Url, error){
 	var url models.Url
-	err := repo.db.WithContext(ctx).Where("shortened = ?",shortenedUrl).First(&url).Error
+	err := repo.db.WithContext(ctx).Where("shortened = ?", shortUrl).First(&url).Error
 	if err != nil {
 		return models.Url{}, err
 	}
 	return url, nil
 }
 
-func (repo *urlRepository) ReadByEmail(ctx context.Context, email string) ([]models.Url, error) {
+func (repo *urlRepository) ReadByEmail(ctx context.Context, email,shortenedUrl string) (models.Url, error){
+	var url models.Url
+	err := repo.db.WithContext(ctx).Where("user_email =?  AND shortened = ?",email, shortenedUrl).First(&url).Error
+	if err != nil {
+		return models.Url{}, err
+	}
+	return url, nil
+}
+
+func (repo *urlRepository) ReadListByEmail(ctx context.Context, email string) ([]models.Url, error) {
 	var urls []models.Url
 	err := repo.db.WithContext(ctx).Where("user_email = ?", email).Find(&urls).Error
 	if err != nil {

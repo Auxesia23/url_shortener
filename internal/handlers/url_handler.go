@@ -51,8 +51,9 @@ func(handler *urlHandler) HandleCreateUrl(c *gin.Context){
 
 func(handler *urlHandler) HandleGetUrl(c *gin.Context){
 	shortUrl := c.Param("id")
+	user := c.MustGet("user")
 	
-	url, err := handler.urlService.GetUrl(context.Background(), shortUrl)
+	url, err := handler.urlService.GetUrl(context.Background(), user.(string), shortUrl)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error":"Short url not found"})
 		return

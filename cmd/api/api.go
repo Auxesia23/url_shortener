@@ -28,6 +28,7 @@ func NewApplication(cfg config) *application {
 
 func (app *application) mount() http.Handler {
 	r := gin.Default()
+	r.GET("/:id")
 	{
 		v1 := r.Group("/v1")
 		v1.GET("/status", func(c *gin.Context){
@@ -42,10 +43,11 @@ func (app *application) mount() http.Handler {
 		
 		{
 			urls := v1.Group("/urls")
-			urls.POST("/", middlewares.JwtAuthMiddleware(), app.urlHandler.HandleCreateUrl)
-			urls.GET("/", middlewares.JwtAuthMiddleware(), app.urlHandler.HandleGetUrlByEmail)
-			urls.DELETE("/:id", middlewares.JwtAuthMiddleware(), app.urlHandler.HandleDeleteUrl)
+			urls.Use(middlewares.JwtAuthMiddleware())
+			urls.POST("/", app.urlHandler.HandleCreateUrl)
+			urls.GET("/",  app.urlHandler.HandleGetUrlByEmail)
 			urls.GET("/:id", app.urlHandler.HandleGetUrl)
+			urls.DELETE("/:id", app.urlHandler.HandleDeleteUrl)
 		}
 		
 		
