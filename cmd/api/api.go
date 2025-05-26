@@ -13,6 +13,7 @@ type application struct {
     config config
     userHandler handler.UserHandler
     urlHandler handler.UrlHandler
+    redirectHandler handler.RedirectHandler
 }
 
 
@@ -28,7 +29,9 @@ func NewApplication(cfg config) *application {
 
 func (app *application) mount() http.Handler {
 	r := gin.Default()
-	r.GET("/:id")
+	
+	r.GET("/:id",app.redirectHandler.HandleRedirect)
+	
 	{
 		v1 := r.Group("/v1")
 		v1.GET("/status", func(c *gin.Context){
