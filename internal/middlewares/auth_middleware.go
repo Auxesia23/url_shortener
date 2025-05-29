@@ -25,7 +25,7 @@ func JwtAuthMiddleware() gin.HandlerFunc{
 
 		token, err := auth.VerifyJWT(tokenString) 
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token otorisasi tidak valid atau kedaluwarsa"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization token or expired"})
 			return
 		}
 		

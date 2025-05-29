@@ -27,7 +27,7 @@ func (service *redirectService) Redirect(ctx context.Context,shortUrl string)(ma
 		return mapper.UrlResponse{}, err
 	}
 	
-	response := mapper.ParseResponse(url)
+	response := mapper.ParseUrlResponse(url)
 	
 	return response, nil
 }

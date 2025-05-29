@@ -8,7 +8,7 @@ import (
 
 func InitDB() (*gorm.DB, error) {
   db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
-  db.AutoMigrate(&models.Url{},&models.User{})
+  db.AutoMigrate(&models.Url{},&models.User{},&models.Analytic{})
   if err != nil {
     return nil, err
   }
