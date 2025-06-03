@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 
 	"github.com/Auxesia23/url_shortener/internal/mapper"
 	"github.com/Auxesia23/url_shortener/internal/models"
@@ -29,8 +30,10 @@ func NewAnalyticRepository(db *gorm.DB) AnalyticRepository{
 func(repo *analyticRepository)Create(ctx context.Context, analytic models.Analytic)error{
 	err := repo.db.WithContext(ctx).Create(&analytic).Error
 	if err != nil {
+		log.Printf("Error : %s", err.Error())
 		return err
 	}
+	log.Println("Analythic saved")
 	return nil
 }
 

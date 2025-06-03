@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	service "github.com/Auxesia23/url_shortener/internal/services"
@@ -25,13 +26,17 @@ func NewRedirectHandler(redirectService service.RedirectService, analyticServive
 
 func (handler *redirectHandler)HandleRedirect(c *gin.Context){
 	id := c.Param("id")
+	ip := c.ClientIP()
+	agent := c.Request.UserAgent()
+	
+	go handler.analyticServive.Save(context.Background(), id, ip, agent)
+
 	url, err := handler.redirectService.Redirect(c.Request.Context(), id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error" : "Short url not found"})
 		return
 	}
 	
-	go handler.analyticServive.Save(c.Request.Context(), id, c.ClientIP(), c.Request.UserAgent())
-	
+
 	c.Redirect(http.StatusTemporaryRedirect, url.Original)
 }

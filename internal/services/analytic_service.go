@@ -28,6 +28,7 @@ func NewAnalyticService(analyticRepo repository.AnalyticRepository,ipInfo *ipinf
 }
 
 func(service *analyticService)Save(ctx context.Context, url,ip,agent string){
+
 	var country string
 	info, err := service.ipInfo.GetIPInfo(net.ParseIP(ip))
 	if err != nil {
