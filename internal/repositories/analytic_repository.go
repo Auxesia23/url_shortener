@@ -33,7 +33,7 @@ func(repo *analyticRepository)Create(ctx context.Context, analytic models.Analyt
 		log.Printf("Error : %s", err.Error())
 		return err
 	}
-	log.Println("Analythic saved")
+
 	return nil
 }
 

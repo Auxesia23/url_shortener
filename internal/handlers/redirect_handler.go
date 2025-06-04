@@ -37,6 +37,5 @@ func (handler *redirectHandler)HandleRedirect(c *gin.Context){
 		return
 	}
 	
-
 	c.Redirect(http.StatusTemporaryRedirect, url.Original)
 }
