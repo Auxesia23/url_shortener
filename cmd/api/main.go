@@ -36,7 +36,7 @@ func main() {
 	auth.InitOauth()
 	
 	//Database
-	db, err := db.InitDB()
+	db, err := db.InitPostgres()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -8,6 +8,4 @@ type Analytic struct{
 	IpAddress string `json:"ip_address" gorm:"type:varchar(255);not null"`
 	Country string `json:"country" gorm:"type:varchar(255);not null"`
 	UserAgent string `json:"user_agent" gorm:"type:varchar(255);not null"`
-	
-	Url Url `json:"url" gorm:"foreignKey:ShortenedUrl;reference:Shortened;onDelete:CASCADE"`
 }

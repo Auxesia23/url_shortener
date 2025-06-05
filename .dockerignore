@@ -1,0 +1,7 @@
+.dockerignore
+.gitignore
+Makefile
+Readme.md
+*.db
+bin/
+web/

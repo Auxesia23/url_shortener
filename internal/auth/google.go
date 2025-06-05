@@ -2,11 +2,12 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"encoding/json"
 
 	"github.com/Auxesia23/url_shortener/internal/models"
 	"golang.org/x/oauth2"
@@ -29,12 +30,13 @@ func InitOauth(){
 
 func ExchangeToken(code string)(*oauth2.Token, error){
 	if GoogleOauthConfig == nil {
-		return nil, errors.New("Google Oauth config is not initialized")
+		return nil, errors.New("google Oauth config is not initialized")
 	}
 	
 	token, err := GoogleOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
-		return nil, errors.New("Error exchanging code")
+		log.Println(err.Error())
+		return nil, err
 	}
 	
 	return token, nil

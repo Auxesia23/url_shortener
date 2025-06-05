@@ -49,7 +49,7 @@ func(repo *analyticRepository)GetTotalClicks(ctx context.Context, shortUrl strin
 func(repo *analyticRepository)GetClicksPerDay(ctx context.Context, shortUrl string)([]mapper.DailyClickStat, error){
 	var clicksPerDay []mapper.DailyClickStat
 	err := repo.db.WithContext(ctx).Model(&models.Analytic{}).
-		Select("created_at as date,COUNT(*) as count").
+		Select("DATE(created_at) as date,COUNT(*) as count").
 		Where("shortened_url = ?",shortUrl).
 		Group("DATE(created_at)").
 		Scan(&clicksPerDay).Error
