@@ -20,18 +20,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
-  
-  ngrok:
-    image: ngrok/ngrok
-    ports:
-      - "4040:4040"
-    networks:
-      - app-network
-    env_file:
-      - .env
-    command: http go-app:8080
-    depends_on:
-      - go-app
 
 volumes:
   postgres_data:
