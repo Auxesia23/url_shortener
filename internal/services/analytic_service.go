@@ -53,7 +53,6 @@ func(service *analyticService)Save(ctx context.Context, url,ip,agent string){
 	analytic := mapper.ParseAnalyticInput(input)
 	
 	_ = service.analyticRepo.Create(ctx, analytic)
-	return
 }
 
 func (service *analyticService) Get(ctx context.Context, url string) (mapper.AnalyticResponse, error) {
@@ -74,19 +73,28 @@ func (service *analyticService) Get(ctx context.Context, url string) (mapper.Ana
 	g.Go(func() error {
 		var err error
 		dailyClicks, err = service.analyticRepo.GetClicksPerDay(gCtx, url)
-		return errors.New("failed to get daily clicks: " + err.Error())
+		if err != nil {
+			return errors.New("failed to get daily clicks: " + err.Error())
+		}
+		return nil
 	})
 
 	g.Go(func() error {
 		var err error
 		clicksPerCountry, err = service.analyticRepo.GetClicksPerCountry(gCtx, url)
-		return errors.New("failed to get clicks per country: " + err.Error())
+		if err != nil {
+			return errors.New("failed to get clicks per country: " + err.Error())
+		}
+		return nil
 	})
 
 	g.Go(func() error {
 		var err error
 		clicksPerUserAgent, err = service.analyticRepo.GetClicksPerUserAgent(gCtx, url)
-		return errors.New("failed to get clicks per user agent: " + err.Error())
+		if err != nil {
+			return errors.New("failed to get clicks per user agent: " + err.Error())
+		}
+		return nil
 	})
 
 	err := g.Wait()

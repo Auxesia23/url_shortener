@@ -53,7 +53,7 @@ func (repo *urlRepository) ReadByEmail(ctx context.Context, email,shortenedUrl s
 
 func (repo *urlRepository) ReadListByEmail(ctx context.Context, email string) ([]models.Url, error) {
 	var urls []models.Url
-	err := repo.db.WithContext(ctx).Where("user_email = ?", email).Find(&urls).Error
+	err := repo.db.WithContext(ctx).Where("user_email = ?", email).Order("created_at DESC").Find(&urls).Error
 	if err != nil {
 		return []models.Url{}, err
 	}
