@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Auxesia23/url_shortener/internal/mapper"
 	repository "github.com/Auxesia23/url_shortener/internal/repositories"
+	"github.com/Auxesia23/url_shortener/internal/utils"
 )
 
 type UrlService interface{
@@ -26,6 +28,9 @@ func NewUrlService (urlRepo repository.UrlRepository) UrlService{
 
 func (service *urlService) CreateShortUrl(ctx context.Context, url mapper.UrlInput, userEmail string) (mapper.UrlResponse, error){
 	input := mapper.ParseUrlInput(url, userEmail)
+	if (!utils.ValidateUrl(input.Shortened)){
+		return mapper.UrlResponse{}, errors.New("invalid short URL. Only aplhanumeric characters, hypens, and underscore are allowed")
+	}
 	err := service.urlRepo.Create(ctx, input)
 	if err != nil {
 		return mapper.UrlResponse{}, err
