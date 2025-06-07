@@ -1,6 +1,6 @@
 services:
   go-app:
-    image: docker.io/fajargst/url_shortener:latest
+    build: .
     ports:
       - "8080:8080"
     env_file:

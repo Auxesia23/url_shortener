@@ -29,16 +29,16 @@ func NewUrlService (urlRepo repository.UrlRepository) UrlService{
 func (service *urlService) CreateShortUrl(ctx context.Context, url mapper.UrlInput, userEmail string) (mapper.UrlResponse, error){
 	input := mapper.ParseUrlInput(url, userEmail)
 	if (!utils.ValidateUrl(input.Shortened)){
-		return mapper.UrlResponse{}, errors.New("invalid short URL. Only aplhanumeric characters, hypens, and underscore are allowed")
+		return mapper.UrlResponse{}, errors.New("invalid short URL. Minimum 5 charracters and no special characters")
 	}
 	err := service.urlRepo.Create(ctx, input)
 	if err != nil {
-		return mapper.UrlResponse{}, err
+		return mapper.UrlResponse{}, errors.New("the provided URL is already in use")
 	}
 	
 	createdUrl, err := service.urlRepo.Read(ctx, url.Shortened)
 	if err != nil {
-		return mapper.UrlResponse{}, err
+		return mapper.UrlResponse{}, errors.New("failed to retrieve the created URL")
 	}
 	
 	response := mapper.ParseUrlResponse(createdUrl)
@@ -49,7 +49,7 @@ func (service *urlService) CreateShortUrl(ctx context.Context, url mapper.UrlInp
 func(service *urlService) GetUrl(ctx context.Context, email,shortUrl string) (mapper.UrlResponse, error) {
 	url, err := service.urlRepo.ReadByEmail(ctx, email,shortUrl)
 	if err != nil {
-		return mapper.UrlResponse{}, err
+		return mapper.UrlResponse{}, errors.New("short URL not found or does not belong to the user")
 	}
 	
 	response := mapper.ParseUrlResponse(url)
@@ -60,7 +60,7 @@ func(service *urlService) GetUrl(ctx context.Context, email,shortUrl string) (ma
 func (service *urlService) GetUrlByEmail(ctx context.Context, email string)(mapper.UrlListResponse, error){
 	urls, err := service.urlRepo.ReadListByEmail(ctx, email)
 	if err != nil {
-		return mapper.UrlListResponse{}, err
+		return mapper.UrlListResponse{}, errors.New("failed to retrieve URLs for the user")
 	}
 	
 	response := mapper.ParseUrlListResponse(urls)
@@ -71,7 +71,7 @@ func (service *urlService) GetUrlByEmail(ctx context.Context, email string)(mapp
 func(service *urlService) DeleteUrl(ctx context.Context, email,shortUrl string) error{
 	err := service.urlRepo.Delete(ctx, email, shortUrl)
 	if err != nil {
-		return err
+		return errors.New("failed to delete the URL or it does not belong to the user")
 	}
 	
 	return nil

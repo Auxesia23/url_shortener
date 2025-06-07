@@ -33,7 +33,7 @@ func (handler *redirectHandler)HandleRedirect(c *gin.Context){
 
 	url, err := handler.redirectService.Redirect(c.Request.Context(), id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error" : "Short url not found"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error" : err.Error()})
 		return
 	}
 	

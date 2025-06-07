@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"net"
 
 	"github.com/Auxesia23/url_shortener/internal/mapper"
@@ -73,19 +74,19 @@ func (service *analyticService) Get(ctx context.Context, url string) (mapper.Ana
 	g.Go(func() error {
 		var err error
 		dailyClicks, err = service.analyticRepo.GetClicksPerDay(gCtx, url)
-		return err
+		return errors.New("failed to get daily clicks: " + err.Error())
 	})
 
 	g.Go(func() error {
 		var err error
 		clicksPerCountry, err = service.analyticRepo.GetClicksPerCountry(gCtx, url)
-		return err
+		return errors.New("failed to get clicks per country: " + err.Error())
 	})
 
 	g.Go(func() error {
 		var err error
 		clicksPerUserAgent, err = service.analyticRepo.GetClicksPerUserAgent(gCtx, url)
-		return err
+		return errors.New("failed to get clicks per user agent: " + err.Error())
 	})
 
 	err := g.Wait()

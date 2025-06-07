@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Auxesia23/url_shortener/internal/auth"
 	"github.com/Auxesia23/url_shortener/internal/models"
@@ -26,13 +27,13 @@ func (service *userService) GoogleLogin(ctx context.Context,code string)(string,
 	//Exchange code for oauth2 token
 	token, err := auth.ExchangeToken(code)
 	if err != nil {
-		return "",err
+		return "",errors.New("failed to exchange code for token: " + err.Error())
 	}
 	
 	//Fetching google user info
 	googleUser, err := auth.FetchUserInfo(token)
 	if err != nil {
-		return "",err
+		return "",errors.New("failed to fetch user info: " + err.Error())
 	}
 	
 	//User for creating jwt
@@ -51,20 +52,20 @@ func (service *userService) GoogleLogin(ctx context.Context,code string)(string,
 		//Creating new user from google user info
 		err := service.userRepo.Create(ctx, newUser)
 		if err != nil {
-			return "", err
+			return "", errors.New("failed to create user: " + err.Error())
 		}
 		
 		//Getting created user data
 		userForJWT, err = service.userRepo.Read(ctx, googleUser.Email)
 		if err != nil {
-			return "", err
+			return "", errors.New("failed to retrieve created user: " + err.Error())
 		}
 	}
 	
 	//Generate jwt
 	jwt, err := auth.GenerateToken(&userForJWT)
 	if err != nil {
-		return "", err
+		return "", errors.New("failed to generate JWT: " + err.Error())
 	}
 	
 	return jwt, nil

@@ -56,7 +56,7 @@ func(handler *urlHandler) HandleGetUrl(c *gin.Context){
 	
 	url, err := handler.urlService.GetUrl(c.Request.Context(), user.(string), shortUrl)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error":"Short url not found"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error":err.Error()})
 		return
 	}
 	
