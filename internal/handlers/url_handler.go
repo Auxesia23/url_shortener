@@ -43,7 +43,7 @@ func(handler *urlHandler) HandleCreateUrl(c *gin.Context){
 	
 	url, err := handler.urlService.CreateShortUrl(c.Request.Context(), urlInput, user.(string))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error":"The requested short url has already in use"})
+		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error":err.Error()})
 		return
 	}
 	

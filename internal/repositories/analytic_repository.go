@@ -52,6 +52,8 @@ func(repo *analyticRepository)GetClicksPerDay(ctx context.Context, shortUrl stri
 		Select("DATE(created_at) as date,COUNT(*) as count").
 		Where("shortened_url = ?",shortUrl).
 		Group("DATE(created_at)").
+		Order("DATE(created_at) DESC").
+		Limit(7).
 		Scan(&clicksPerDay).Error
 	
 	if err != nil {
