@@ -17,49 +17,76 @@ Aplikasi URL Shortener adalah layanan pemendek URL yang dibangun menggunakan Go 
 - **Go** - Bahasa pemrograman utama
 - **Gin** - Web framework
 - **GORM** - ORM (Object Relational Mapping)
-- **SQLite** - Database
+- **PostgreSQL** - Database
 - **JWT** - Token autentikasi
 - **Google OAuth2** - Autentikasi pengguna
+- **Docker** & **Docker Compose** - Deployment
 
 ## Persyaratan Sistem
 
-- Go 1.24.0 atau yang lebih baru
-- SQLite
+- Go 1.24.0 atau yang lebih baru (jika menjalankan tanpa Docker)
+- Docker & Docker Compose (jika ingin menjalankan dengan container)
+- PostgreSQL
 
 ## Konfigurasi
 
 Buat file `.env` di root proyek dengan konfigurasi berikut:
 
 ```env
-BASE_URL=http://localhost:8080
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-JWT_SECRET=your_jwt_secret
+GOOGLE_REDIRECT_URI=http://localhost:8080/v1/auth/google/callback
+SECRET_KEY=your_jwt_secret
+BASE_URL=http://localhost:8080
+IPINFO_TOKEN=your_ipinfo_token
+
+DATABASE_URL=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
 ```
+
+> **Catatan:**  
+> - Pastikan `DATABASE_URL` sesuai dengan konfigurasi pada `compose.yaml`.
+> - Untuk development, Anda bisa menggunakan nilai default seperti di atas.
 
 ## Cara Menjalankan
 
-1. Clone repositori
-```bash
-git clone https://github.com/Auxesia23/url_shortener.git
-```
+### Dengan Docker Compose
 
-2. Masuk ke direktori proyek
-```bash
-cd url_shortener
-```
+1. **Clone repositori**
+    ```bash
+    git clone https://github.com/Auxesia23/url_shortener.git
+    cd url_shortener
+    ```
 
-3. Install dependensi
-```bash
-go mod download
-```
+2. **Salin file contoh environment**
+    ```bash
+    cp .env.example .env
+    # Edit .env sesuai kebutuhan
+    ```
 
-4. Jalankan aplikasi
-```bash
-go run cmd/api/main.go
-```
+3. **Jalankan aplikasi**
+    ```bash
+    docker compose up --build
+    ```
 
 Aplikasi akan berjalan di `http://localhost:8080`
+
+### Tanpa Docker
+
+1. **Install dependensi**
+    ```bash
+    go mod download
+    ```
+
+2. **Jalankan PostgreSQL**  
+   Pastikan database PostgreSQL sudah berjalan dan environment variable sudah diatur.
+
+3. **Jalankan aplikasi**
+    ```bash
+    go run cmd/api/main.go
+    ```
 
 ## Struktur Proyek
 
@@ -71,52 +98,36 @@ Aplikasi akan berjalan di `http://localhost:8080`
 │       └── main.go
 ├── internal/
 │   ├── auth/
-│   │   ├── google.go
-│   │   └── jwt.go
 │   ├── db/
-│   │   └── sqlite.go
 │   ├── handlers/
-│   │   ├── redirect_handler.go
-│   │   ├── url_handler.go
-│   │   └── user_handler.go
 │   ├── mapper/
-│   │   ├── analytic_mapper.go
-│   │   └── url_mapperr.go
 │   ├── middlewares/
-│   │   └── auth_middleware.go
 │   ├── models/
-│   │   ├── analytic.go
-│   │   ├── url.go
-│   │   └── user.go
 │   ├── repositories/
-│   │   ├── analytic_repository.go
-│   │   ├── url_repository.go
-│   │   └── user_repository.go
 │   ├── services/
-│   │   ├── analytic_service.go
-│   │   ├── redirect_service.go
-│   │   ├── url_service.go
-│   │   └── user_service.go
 │   └── utils/
-│       ├── auth_validator.go
-│       └── hashPassword.go
-└── go.mod
+├── Dockerfile
+├── compose.yaml
+├── go.mod
+├── go.sum
+├── .env.example
+└── README.md
 ```
 
 ## API Endpoints
 
 ### URL Endpoints
 
-- `POST /api/urls` - Membuat URL pendek baru
-- `GET /api/urls` - Mendapatkan daftar URL pengguna
-- `DELETE /api/urls/:shortened` - Menghapus URL pendek
+- `POST /v1/urls` - Membuat URL pendek baru
+- `GET /v1/urls` - Mendapatkan daftar URL pengguna
+- `DELETE /v1/urls/:shortened` - Menghapus URL pendek
 - `GET /:shortened` - Redirect ke URL asli
-- `GET /api/urls/:shortened/analytics` - Mendapatkan statistik penggunaan URL
+- `GET /v1/urls/:shortened` - Mendapatkan detail URL & analitik
 
 ### Autentikasi Endpoints
 
-- `GET /auth/google/login` - Memulai proses login Google
-- `GET /auth/google/callback` - Callback URL untuk autentikasi Google
+- `GET /v1/auth/google` - Memulai proses login Google
+- `GET /v1/auth/google/callback` - Callback URL untuk autentikasi Google
 
 ## Model Data
 
@@ -142,10 +153,10 @@ type User struct {
 ### Analytic Model
 ```go
 type Analytic struct {
-    ShortenedUrl    string
-    VisitedAt       time.Time
-    UserAgent       string
-    IPAddress       string
+    ShortenedUrl string
+    IpAddress    string
+    Country      string
+    UserAgent    string
 }
 ```
 
