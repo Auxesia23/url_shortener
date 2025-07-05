@@ -1,0 +1,252 @@
+definitions:
+  handler.ErrorMessage:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.GoogleUrlResponse:
+    properties:
+      url:
+        type: string
+    type: object
+  handler.TokenResponse:
+    properties:
+      acces_token:
+        type: string
+    type: object
+  mapper.AnalyticResponse:
+    properties:
+      clicks_per_country:
+        items:
+          $ref: '#/definitions/mapper.ClickStat'
+        type: array
+      clicks_per_day:
+        items:
+          $ref: '#/definitions/mapper.DailyClickStat'
+        type: array
+      clicks_per_user_agent:
+        items:
+          $ref: '#/definitions/mapper.ClickStat'
+        type: array
+      total_click:
+        type: integer
+    type: object
+  mapper.ClickStat:
+    properties:
+      count:
+        type: integer
+      name:
+        type: string
+    type: object
+  mapper.DailyClickStat:
+    properties:
+      count:
+        type: integer
+      date:
+        type: string
+    type: object
+  mapper.UrlAnalyticResponse:
+    properties:
+      analytic:
+        $ref: '#/definitions/mapper.AnalyticResponse'
+      url:
+        $ref: '#/definitions/mapper.UrlResponse'
+    type: object
+  mapper.UrlInput:
+    properties:
+      original:
+        type: string
+      shortened:
+        type: string
+    type: object
+  mapper.UrlListResponse:
+    properties:
+      urls:
+        items:
+          $ref: '#/definitions/mapper.UrlResponse'
+        type: array
+    type: object
+  mapper.UrlResponse:
+    properties:
+      created_at:
+        type: string
+      original:
+        type: string
+      shortened:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/google:
+    get:
+      description: Get Google OAuth login URL
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.GoogleUrlResponse'
+      summary: Google OAuth login
+      tags:
+      - auth
+  /auth/google/callback:
+    get:
+      description: Handle Google OAuth callback and return JWT token
+      parameters:
+      - description: OAuth code
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.TokenResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+      summary: Google OAuth callback
+      tags:
+      - auth
+  /urls/:
+    get:
+      description: Get all short URLs created by the authenticated user
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/mapper.UrlListResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Get all short URLs by user
+      tags:
+      - urls
+    post:
+      consumes:
+      - application/json
+      description: Create a new short URL for the authenticated user
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: URL input
+        in: body
+        name: url
+        required: true
+        schema:
+          $ref: '#/definitions/mapper.UrlInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/mapper.UrlResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Create a new short URL
+      tags:
+      - urls
+  /urls/{id}:
+    delete:
+      description: Delete a short URL owned by the authenticated user
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Short URL ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Delete a short URL
+      tags:
+      - urls
+    get:
+      description: Get detail and analytics for a short URL owned by the authenticated
+        user
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Short URL ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/mapper.UrlAnalyticResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Get a short URL detail
+      tags:
+      - urls
+swagger: "2.0"
