@@ -7,25 +7,25 @@ import (
 	"gorm.io/gorm"
 )
 
-type UrlRepository interface{
+type UrlRepository interface {
 	Create(ctx context.Context, url models.Url) error
 	Read(ctx context.Context, shortUrl string) (models.Url, error)
 	ReadByEmail(ctx context.Context, email, shortenedUrl string) (models.Url, error)
 	ReadListByEmail(ctx context.Context, email string) ([]models.Url, error)
-	Delete(ctx context.Context, email,shortUrl string) error
+	Delete(ctx context.Context, email, shortUrl string) error
 }
 
-type urlRepository struct{
+type urlRepository struct {
 	db *gorm.DB
 }
 
-func NewUrlRepository (db *gorm.DB) UrlRepository{
+func NewUrlRepository(db *gorm.DB) UrlRepository {
 	return &urlRepository{
-		db:  db,
+		db: db,
 	}
 }
 
-func (repo *urlRepository) Create(ctx context.Context, url models.Url)error {
+func (repo *urlRepository) Create(ctx context.Context, url models.Url) error {
 	err := repo.db.WithContext(ctx).Create(&url).Error
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (repo *urlRepository) Create(ctx context.Context, url models.Url)error {
 	return nil
 }
 
-func(repo *urlRepository) Read(ctx context.Context, shortUrl string) (models.Url, error){
+func (repo *urlRepository) Read(ctx context.Context, shortUrl string) (models.Url, error) {
 	var url models.Url
 	err := repo.db.WithContext(ctx).Where("shortened = ?", shortUrl).First(&url).Error
 	if err != nil {
@@ -42,9 +42,9 @@ func(repo *urlRepository) Read(ctx context.Context, shortUrl string) (models.Url
 	return url, nil
 }
 
-func (repo *urlRepository) ReadByEmail(ctx context.Context, email,shortenedUrl string) (models.Url, error){
+func (repo *urlRepository) ReadByEmail(ctx context.Context, email, shortenedUrl string) (models.Url, error) {
 	var url models.Url
-	err := repo.db.WithContext(ctx).Where("user_email =?  AND shortened = ?",email, shortenedUrl).First(&url).Error
+	err := repo.db.WithContext(ctx).Where("user_email =?  AND shortened = ?", email, shortenedUrl).First(&url).Error
 	if err != nil {
 		return models.Url{}, err
 	}
@@ -60,13 +60,13 @@ func (repo *urlRepository) ReadListByEmail(ctx context.Context, email string) ([
 	return urls, nil
 }
 
-func (repo *urlRepository) Delete(ctx context.Context, email,shortUrl string) error{
-	result:= repo.db.WithContext(ctx).Where("user_email = ? AND shortened = ?",email,shortUrl).Delete(&models.Url{})
+func (repo *urlRepository) Delete(ctx context.Context, email, shortUrl string) error {
+	result := repo.db.WithContext(ctx).Unscoped().Where("user_email = ? AND shortened = ?", email, shortUrl).Delete(&models.Url{})
 	if result.Error != nil {
 		return result.Error
 	}
-	
-	if result.RowsAffected < 1{
+
+	if result.RowsAffected < 1 {
 		return gorm.ErrRecordNotFound
 	}
 	return nil
